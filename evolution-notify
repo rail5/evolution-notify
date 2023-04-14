@@ -23,6 +23,9 @@ if [[ "$evolutionpid" == "" ]]; then
 	export evolutionpid=$(pidof evolution)
 fi
 
+# Get X Window ID
+export windowid=$(xdotool search --pid $evolutionpid --onlyvisible)
+
 # Store a flag in a file to tell us whether the Evolution window is currently displayed (1)
 # Or minimized to the tray (0)
 export evolutiondisplayingfile=$(mktemp --tmpdir ${0##*/}-display.XXXXXXXX)
@@ -44,6 +47,8 @@ echo "0" > $countfile
 
 # Add handler to manage process shutdown
 function on_exit() {
+	# Re-map Window in case it was unmapped
+	xdotool windowmap $windowid
 	# Send command to yad through pipe
 	echo "quit" >&3
 	rm -f $PIPE
@@ -63,22 +68,16 @@ function set_count_to_zero() {
 export -f set_count_to_zero
 
 function on_click() {
-	windowids=$(xdotool search --pid $evolutionpid)
-	
 	windowcurrentlydisplayed=$(cat $evolutiondisplayingfile)
 	
 	if [[ $windowcurrentlydisplayed -eq 1 ]]; then
 		# If the window is up, 'unmap' it
-		for id in $windowids; do
-			xdotool windowunmap $id
-			echo "0" > $evolutiondisplayingfile
-		done
+		xdotool windowunmap $windowid
+		echo "0" > $evolutiondisplayingfile
 	else
 		# If the window is unmapped, remap it
-		for id in $windowids; do
-			xdotool windowmap $id
-			echo "1" > $evolutiondisplayingfile
-		done
+		xdotool windowmap $windowid
+		echo "1" > $evolutiondisplayingfile
 	fi
 }
 
@@ -106,6 +105,15 @@ function update_icon() {
 
 export -f update_icon   
 
+function check_evolution_still_running() {
+	# If the Evolution process is no longer running, close this program as well
+	if (! ps -p $evolutionpid >/dev/null 2>&1); then
+		on_exit
+	fi
+}
+
+export -f check_evolution_still_running
+
 # Create the system tray icon
 yad --notification \
 	--listen \
@@ -117,6 +125,7 @@ yad --notification \
 
 while [ ! -f "$quitfile" ]; do
 	update_icon
+	check_evolution_still_running
 	sleep 60
 done
 
