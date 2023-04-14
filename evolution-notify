@@ -1,0 +1,123 @@
+#!/bin/bash
+
+# evolution-notify
+## Provides a system tray icon for Evolution
+## Which can be clicked to minimize to Evolution to the systray,
+## Clicked again to bring it back,
+## And which shows an icon with the number of unread emails you have
+
+set -e
+
+tempdirectory=$(dirname $(mktemp -u))
+
+# Establish "quit" filename
+## The program will run until it sees this file created
+export quitfile="$tempdirectory/evolution-notify.quit"
+
+# Get the process ID of evolution
+# If evolution is not already running, start it
+export evolutionpid=$(pidof evolution)
+
+if [[ "$evolutionpid" == "" ]]; then
+	evolution & disown
+	export evolutionpid=$(pidof evolution)
+fi
+
+# Store a flag in a file to tell us whether the Evolution window is currently displayed (1)
+# Or minimized to the tray (0)
+export evolutiondisplayingfile=$(mktemp --tmpdir ${0##*/}-display.XXXXXXXX)
+echo "1" > $evolutiondisplayingfile
+
+# Create a FIFO file, used to manage the I/O redirection from shell
+PIPE=$(mktemp -u --tmpdir ${0##*/}.XXXXXXXX)
+mkfifo $PIPE
+export PIPE
+
+# Attach a file descriptor to the file
+exec 3<> $PIPE
+
+# Create a tmp file to store the email count as we go
+export countfile="$tempdirectory/evolution-notify.count"
+
+# Set the current count to zero
+echo "0" > $countfile
+
+# Add handler to manage process shutdown
+function on_exit() {
+	# Send command to yad through pipe
+	echo "quit" >&3
+	rm -f $PIPE
+	rm -f $countfile
+	rm -f $evolutiondisplayingfile
+}
+trap on_exit EXIT
+
+function set_count_to_zero() {
+	emailcount=0
+	echo "$emailcount" > $countfile
+	
+	exec 3<> $PIPE
+	echo "icon:/usr/share/evolution-notify/images/$emailcount.png" >&3
+}
+
+export -f set_count_to_zero
+
+function on_click() {
+	windowids=$(xdotool search --pid $evolutionpid)
+	
+	windowcurrentlydisplayed=$(cat $evolutiondisplayingfile)
+	
+	if [[ $windowcurrentlydisplayed -eq 1 ]]; then
+		# If the window is up, 'unmap' it
+		for id in $windowids; do
+			xdotool windowunmap $id
+			echo "0" > $evolutiondisplayingfile
+		done
+	else
+		# If the window is unmapped, remap it
+		for id in $windowids; do
+			xdotool windowmap $id
+			echo "1" > $evolutiondisplayingfile
+		done
+	fi
+}
+
+export -f on_click
+
+# Add handler for right click menu Quit entry function 
+on_quit() {
+	echo $quitfile
+	# Create the quitfile
+	echo "quit" > $quitfile
+	exec 3<> $PIPE
+	echo "quit" >&3
+	kill $evolutionpid
+} 
+
+export -f on_quit
+
+function update_icon() {
+	# Get current email count
+	emailcount=$(cat $countfile)
+	
+	exec 3<> $PIPE
+	echo "icon:/usr/share/evolution-notify/images/$emailcount.png" >&3
+}
+
+export -f update_icon   
+
+# Create the system tray icon
+yad --notification \
+	--listen \
+	--image="/usr/share/evolution-notify/images/0.png"  \
+	--text="evolution-notify"   \
+	--menu="Quit!bash -c on_quit|Clear count!bash -c set_count_to_zero" \
+	--no-middle \
+	--command="bash -c on_click" <&3 &
+
+while [ ! -f "$quitfile" ]; do
+	update_icon
+	sleep 60
+done
+
+rm -f $quitfile

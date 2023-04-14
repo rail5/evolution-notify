@@ -1,0 +1,16 @@
+Source: evolution-notify
+Priority: optional
+Maintainer: rail5 <andrew@rail5.org>
+Build-Depends: debhelper (>= 8.0.0)
+Standards-Version: 3.9.3
+Section: utils
+
+Package: evolution-notify
+Version: 0.1
+License: GPL-3.0
+Vendor: rail5 <andrew@rail5.org>
+Priority: optional
+Architecture: all
+Depends: evolution, xdotool, bash
+Description: Provides a systray icon displaying unread email count in Evolution
+  evolution-notify provides a systray icon which displays your unread email count

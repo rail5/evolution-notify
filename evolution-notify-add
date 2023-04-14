@@ -1,0 +1,19 @@
+#!/bin/bash
+
+tempdirectory=$(dirname $(mktemp -u))
+
+countfile="$tempdirectory/evolution-notify.count"
+
+# Get current email count
+emailcount=$(cat $countfile)
+
+# Add one
+emailcount=$(expr $emailcount + 1)
+
+# We can only go up to 10
+if [[ $emailcount -gt 10 ]]; then
+	emailcount=10
+fi
+
+# Update the count in the file
+echo "$emailcount" > $countfile

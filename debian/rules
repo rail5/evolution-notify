@@ -1,0 +1,22 @@
+#!/usr/bin/make -f
+%:
+	dh $@
+
+override_dh_auto_install:
+	chmod +x evolution-notify
+	chmod +x evolution-notify-add
+	chmod +x evolution-notify-subtract
+	install -D -m 0755 evolution-notify "$$(pwd)/debian/evolution-notify/usr/bin/evolution-notify"
+	install -D -m 0755 evolution-notify-add "$$(pwd)/debian/evolution-notify/usr/bin/evolution-notify-add"
+	install -D -m 0755 evolution-notify-subtract "$$(pwd)/debian/evolution-notify/usr/bin/evolution-notify-subtract"
+	install -D images/0.png "$$(pwd)/debian/evolution-notify/usr/share/evolution-notify/images/0.png"
+	install -D images/1.png "$$(pwd)/debian/evolution-notify/usr/share/evolution-notify/images/1.png"
+	install -D images/2.png "$$(pwd)/debian/evolution-notify/usr/share/evolution-notify/images/2.png"
+	install -D images/3.png "$$(pwd)/debian/evolution-notify/usr/share/evolution-notify/images/3.png"
+	install -D images/4.png "$$(pwd)/debian/evolution-notify/usr/share/evolution-notify/images/4.png"
+	install -D images/5.png "$$(pwd)/debian/evolution-notify/usr/share/evolution-notify/images/5.png"
+	install -D images/6.png "$$(pwd)/debian/evolution-notify/usr/share/evolution-notify/images/6.png"
+	install -D images/7.png "$$(pwd)/debian/evolution-notify/usr/share/evolution-notify/images/7.png"
+	install -D images/8.png "$$(pwd)/debian/evolution-notify/usr/share/evolution-notify/images/8.png"
+	install -D images/9.png "$$(pwd)/debian/evolution-notify/usr/share/evolution-notify/images/9.png"
+	install -D images/10.png "$$(pwd)/debian/evolution-notify/usr/share/evolution-notify/images/10.png"
