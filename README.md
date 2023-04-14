@@ -12,7 +12,7 @@ Here's how you can configure Evolution to do it:
   
   - "Add" (for Incoming)
   
-  - Click the "Remove" button next to the example "condition" (Sender contains, etc)
+  - Under the "Condition" section, select "Match All"
   
   - Under "Then", change "Move to Folder" to "Run Program"
   
