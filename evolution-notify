@@ -20,7 +20,7 @@ export evolutionpid=$(pidof evolution)
 
 if [[ "$evolutionpid" == "" ]]; then
 	evolution & disown
-	export evolutionpid=$(pidof evolution)
+	sleep 10 && export evolutionpid=$(pidof evolution)
 fi
 
 # Get X Window ID
