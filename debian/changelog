@@ -1,9 +1,15 @@
-evolution-notify (0.3) UNRELEASED; urgency=medium
+evolution-notify (0.4) stable; urgency=medium
+
+  * Moving everything to Debian 12
+
+ -- rail5 <andrew@rail5.org>  Fri, 18 Aug 2023 23:15:43 -0400
+
+evolution-notify (0.3) bullseye; urgency=medium
 
   * Fixed a problem where evolution-notify could not get
   the Evolution PID for windowmapping
 
- -- rail5 <andrew@rail5.org>  Thu, 08 Jun 2023 13:33:41 -0400
+ -- rail5 <andrew@rail5.org>  Fri, 18 Aug 2023 23:15:37 -0400
 
 evolution-notify (0.2) bullseye; urgency=medium
 
